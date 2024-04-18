@@ -1,0 +1,14 @@
+D:\My data file\studies\4 IIR\s2\J2E\Project Gestion de Salles\Sysgestionsalles\backend\src\main\java\com\example\backend\service\OurUserDetailsService.java
+D:\My data file\studies\4 IIR\s2\J2E\Project Gestion de Salles\Sysgestionsalles\backend\src\main\java\com\example\backend\service\AuthService.java
+D:\My data file\studies\4 IIR\s2\J2E\Project Gestion de Salles\Sysgestionsalles\backend\src\main\java\com\example\backend\BackendApplication.java
+D:\My data file\studies\4 IIR\s2\J2E\Project Gestion de Salles\Sysgestionsalles\backend\src\main\java\com\example\backend\service\JWTUtils.java
+D:\My data file\studies\4 IIR\s2\J2E\Project Gestion de Salles\Sysgestionsalles\backend\src\main\java\com\example\backend\config\SecurityConfig.java
+D:\My data file\studies\4 IIR\s2\J2E\Project Gestion de Salles\Sysgestionsalles\backend\src\main\java\com\example\backend\entity\Product.java
+D:\My data file\studies\4 IIR\s2\J2E\Project Gestion de Salles\Sysgestionsalles\backend\src\main\java\com\example\backend\entity\OurUsers.java
+D:\My data file\studies\4 IIR\s2\J2E\Project Gestion de Salles\Sysgestionsalles\backend\src\main\java\com\example\backend\repository\ProductRepo.java
+D:\My data file\studies\4 IIR\s2\J2E\Project Gestion de Salles\Sysgestionsalles\backend\src\main\java\com\example\backend\controller\AdminUsers.java
+D:\My data file\studies\4 IIR\s2\J2E\Project Gestion de Salles\Sysgestionsalles\backend\src\main\java\com\example\backend\controller\AuthController.java
+D:\My data file\studies\4 IIR\s2\J2E\Project Gestion de Salles\Sysgestionsalles\backend\src\main\java\com\example\backend\config\JWTAuthFIlter.java
+D:\My data file\studies\4 IIR\s2\J2E\Project Gestion de Salles\Sysgestionsalles\backend\src\main\java\com\example\backend\config\CorsConfig.java
+D:\My data file\studies\4 IIR\s2\J2E\Project Gestion de Salles\Sysgestionsalles\backend\src\main\java\com\example\backend\dto\ReqRes.java
+D:\My data file\studies\4 IIR\s2\J2E\Project Gestion de Salles\Sysgestionsalles\backend\src\main\java\com\example\backend\repository\OurUserRepo.java
