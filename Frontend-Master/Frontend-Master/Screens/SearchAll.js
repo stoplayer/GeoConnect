@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -9,60 +8,145 @@ import {
   FlatList,
   ActivityIndicator,
   Button,
-  Alert
+  Alert,
+  TouchableOpacity,
+  Dimensions,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import * as Location from 'expo-location';
+import MapView, { Marker } from 'react-native-maps';
+import { Ionicons } from '@expo/vector-icons';
+import geolib from 'geolib';
+import axios from 'axios';
 
-export default function App() {
+export default function SearcheAll() {
+  const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState([]);
-  const [inMemoryData, setInMemoryData] = useState([]);
+  const [contacts, setContacts] = useState([]);
+  const [inMemoryContacts, setInMemoryContacts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  console.log(searchQuery);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [contactsPerPage] = useState(10);
+  const [userLocation, setUserLocation] = useState(null);
+  const [nearestPhoneNumber, setNearestPhoneNumber] = useState(null);
+  const [mapRegion, setMapRegion] = useState({
+    latitude: 37.78825,
+    longitude: -122.4324,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  });
 
   const searchByName = async () => {
-    setIsLoading(true);
     try {
-      const response = await axios.get(`http://192.168.137.1:7071/public/contact/username/${searchQuery}`);
-      setData(response.data);
-      console.log(data);
-      setIsLoading(false);
+      const response = await axios.get(`https://your-api-url/searchByName?name=${encodeURIComponent(searchQuery)}`);
+      const data = response.data;
+      setContacts(data);
+      setInMemoryContacts(data);
     } catch (error) {
-      console.log('Error searching by name:', error);
-      setIsLoading(false);
-      // Handle the error, e.g., show an error message to the user
-    }
-  };
-  
-  const searchByPhone = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(`http://192.168.137.1:7071/public/contact/contact/${searchQuery}`);
-      setData(response.data);
-      console.log(response.data);
-      setIsLoading(false);
-    } catch (error) {
-      console.log('Error searching by phone:', error);
-      setIsLoading(false);
-      // Handle the error, e.g., show an error message to the user
+      console.log('Error searching contacts by name:', error);
     }
   };
 
+  const searchByPhone = async () => {
+    try {
+      const response = await axios.get(`https://your-api-url/searchByPhone?phoneNumber=${searchQuery}`);
+      const data = response.data;
+      setContacts(data);
+      setInMemoryContacts(data);
+    } catch (error) {
+      console.log('Error searching contacts by phone number:', error);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    navigation.navigate('SearcheBar');
+  };
+
+  const handleNextPage = () => {
+    navigation.navigate('');
+  };
+
+  const indexOfLastContact = currentPage * contactsPerPage;
+  const indexOfFirstContact = indexOfLastContact - contactsPerPage;
+  const currentContacts = contacts.slice(indexOfFirstContact, indexOfLastContact);
+
   const renderItem = ({ item }) => (
-    <View style={styles.recordContainer}>
-      <Text style={styles.recordName}>{item.username}</Text>
-      <Text style={styles.recordPhone}>{item.contact}</Text>
+    <View style={styles.contactContainer}>
+      <Text style={styles.contactName}>
+        {item.firstName} {item.lastName}
+      </Text>
+      {item.phoneNumbers && item.phoneNumbers.length > 0 ? (
+        <Text style={styles.contactNumber}>{item.phoneNumbers[0].digits}</Text>
+      ) : (
+        <Text style={styles.noPhoneNumber}>No phone number</Text>
+      )}
     </View>
   );
+
+  const handleGetLocation = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Permission to access location was denied');
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({});
+      setUserLocation(location.coords);
+      setMapRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
+
+      // Find the nearest phone number within 100 square meters
+      const nearestNumber = contacts.reduce((prev, curr) => {
+        if (!curr.phoneNumbers || curr.phoneNumbers.length === 0 || !curr.latitude || !curr.longitude) {
+          return prev;
+        }
+
+        const distance = geolib.getDistance(
+          { latitude: location.coords.latitude, longitude: location.coords.longitude },
+          { latitude: curr.latitude, longitude: curr.longitude }
+        );
+
+        if (distance <= 100 && (!prev.distance || distance < prev.distance)) {
+          return { number: curr.phoneNumbers[0].digits, latitude: curr.latitude, longitude: curr.longitude, distance };
+        }
+
+        return prev;
+      }, null);
+
+      setNearestPhoneNumber(nearestNumber);
+
+      if (nearestNumber) {
+        Alert.alert(
+          'Nearest Phone Number',
+          `The nearest phone number within 100m is: ${nearestNumber.number}`
+        );
+      } else {
+        Alert.alert('No Phone Number Found', 'There are no phone numbers within 100m');
+      }
+    } catch (error) {
+      console.log('Error getting location:', error);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea} />
-      <TextInput
-        placeholder="Search"
-        placeholderTextColor="#2f363c"
-        style={styles.searchBar}
-        onChangeText={setSearchQuery}
-      />
+      <View style={styles.searchContainer}>
+        <TextInput
+          placeholder="Search"
+          placeholderTextColor="#2f363c"
+          style={styles.searchBar}
+          onChangeText={setSearchQuery}
+        />
+        <TouchableOpacity style={styles.locationButton} onPress={handleGetLocation}>
+          <Ionicons name="map" size={24} color="#2f363c" />
+        </TouchableOpacity>
+      </View>
       <View style={styles.buttonContainer}>
         <View style={styles.searchButton}>
           <Button
@@ -79,21 +163,58 @@ export default function App() {
           />
         </View>
       </View>
-      <View style={styles.recordsContainer}>
+      <View style={styles.contactsContainer}>
         {isLoading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#bad555" />
+            <ActivityIndicator size="large" color="#2f363c" />
           </View>
         ) : null}
+        {userLocation && (
+          <MapView
+            style={styles.map}
+            region={mapRegion}
+            showsUserLocation={true}
+          >
+            <Marker coordinate={userLocation} />
+            {nearestPhoneNumber && (
+              <Marker
+                coordinate={{
+                  latitude: nearestPhoneNumber.latitude,
+                  longitude: nearestPhoneNumber.longitude,
+                }}
+                title="Nearest Phone Number"
+                description={`Number: ${nearestPhoneNumber.number}`}
+              />
+            )}
+          </MapView>
+        )}
         <FlatList
-          data={data}
+          data={currentContacts}
           renderItem={renderItem}
           keyExtractor={(item, index) => index.toString()}
           ListEmptyComponent={() => (
-            <View style={styles.noRecordsContainer}>
-              <Text style={styles.noRecordsText}>No Records Found</Text>
+            <View style={styles.noContactsContainer}>
+              <Text style={styles.noContactsText}>No Contacts Found</Text>
             </View>
           )}
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
+      <View style={styles.footer}>
+        <Button
+          title="Previous"
+          onPress={handlePreviousPage}
+          disabled={currentPage === 1}
+        />
+        <Text
+          style={styles.pageText}
+        >
+          Page {currentPage}
+        </Text>
+        <Button
+          title="Next"
+          onPress={handleNextPage}
+          disabled={indexOfLastContact >= contacts.length}
         />
       </View>
     </View>
@@ -103,66 +224,93 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#fff',
   },
   safeArea: {
     backgroundColor: '#ffffff',
   },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginVertical: 10,
+  },
   searchBar: {
+    flex: 1,
     backgroundColor: '#D5FFFF',
-    height: 50,
-    width: 250,
     borderRadius: 40,
-    alignSelf: 'center',
-    fontSize: 25,
-    padding: 10,
-    paddingLeft: 15,
-    marginTop: 10,
-    marginBottom: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    fontSize: 16,
+    color: '#2f363c',
+  },
+  locationButton: {
+    marginLeft: 8,
+    padding: 8,
+    backgroundColor: '#D5FFFF',
+    borderRadius: 40,
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    marginBottom: 10,
+    justifyContent: 'space-between',
+    marginHorizontal: 16,
+    marginVertical: 10,
   },
   searchButton: {
-    borderRadius: 40,
-    paddingHorizontal: 10,
-  },
-  recordsContainer: {
     flex: 1,
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 10,
-    overflow: 'hidden', // Add this line to hide the scrolling bar
+    marginHorizontal: 4,
   },
-  recordContainer: {
-    marginBottom: 10,
-    padding: 10,
+  contactsContainer: {
+    flex: 1,
+    marginHorizontal: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  map: {
+    width: '100%',
+    height: 200,
+    marginVertical: 16,
+  },
+  contactContainer: {
     backgroundColor: '#f2f2f2',
-    borderRadius: 10,
+    padding: 16,
+    borderRadius: 8,
+    marginVertical: 8,
   },
-  recordName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 5,
-    color: '#000000', // Set text color to black for better visibility
-  },
-  recordPhone: {
-    fontSize: 14,
-    color: '#000000', // Set text color to black for better visibility
-  },
-  loadingContainer:{
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  noRecordsContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  noRecordsText: {
+  contactName: {
     fontSize: 16,
-    color: '#000000', // Set text color to black for better visibility
+    fontWeight: 'bold',
+    color: '#2f363c',
+  },
+  contactNumber: {
+    fontSize: 14,
+    color: '#2f363c',
+  },
+  noPhoneNumber: {
+    fontSize: 14,
+    color: '#8a8a8a',
+  },
+  noContactsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noContactsText: {
+    fontSize: 16,
+    color: '#8a8a8a',
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginVertical: 10,
+  },
+  pageText: {
+    fontSize: 16,
+    color: '#2f363c',
   },
 });

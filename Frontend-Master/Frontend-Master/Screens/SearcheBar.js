@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Contacts from 'expo-contacts';
-import axios from 'axios';
+import SearchAll from './SearchAll';
 
 export default function App() {
   const navigation = useNavigation();
@@ -49,34 +49,8 @@ export default function App() {
       setContacts(data);
       setInMemoryContacts(data);
       setIsLoading(false);
-
-      // Save contacts to backend
-      saveContactsToBackend(data);
     } catch (error) {
       console.log('Error loading contacts:', error);
-      // Handle the error, e.g., show an error message to the user
-    }
-  };
-
-  const saveContactsToBackend = async (contacts) => {
-    try {
-      const backendUrl = 'http://192.168.137.1:7071/public/addcontact';
-      
-      // Iterate over each contact and make a POST request to the API
-      contacts.forEach(async (contact) => {
-        let username = contact.name;
-        let phoneNumber = contact.phoneNumbers && contact.phoneNumbers.length > 0 ? contact.phoneNumbers[0].digits : '';
-
-        // Make a POST request to your backend API
-        await axios.post(backendUrl, {
-          username: username,
-          contact: phoneNumber
-        });
-
-        console.log('Contact saved:', { username, phoneNumber });
-      });
-    } catch (error) {
-      console.log('Error saving contacts to backend:', error);
       // Handle the error, e.g., show an error message to the user
     }
   };
@@ -115,7 +89,7 @@ export default function App() {
   };
 
   const handlePreviousPage = () => {
-    setCurrentPage(currentPage - 1);
+    navigation.navigate('PreviousPage'); // Replace 'PreviousPage' with the name of the previous screen
   };
 
   const handleNextPage = () => {
@@ -143,7 +117,7 @@ export default function App() {
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea} />
       <TextInput
-        placeholder="Search"
+        placeholder="Search "
         placeholderTextColor="#2f363c"
         style={styles.searchBar}
         onChangeText={setSearchQuery}
@@ -167,7 +141,7 @@ export default function App() {
       <View style={styles.contactsContainer}>
         {isLoading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#bad555" />
+            <ActivityIndicator size="large" color="#2f363c" />
           </View>
         ) : null}
         <FlatList
@@ -217,7 +191,7 @@ const styles = StyleSheet.create({
     width: 250,
     borderRadius: 40,
     alignSelf: 'center',
-    fontSize: 25,
+    fontSize: 16,
     padding: 10,
     paddingLeft: 15,
     marginTop: 10,
