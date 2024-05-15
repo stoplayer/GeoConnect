@@ -19,7 +19,7 @@ const SignIn = ({ navigation }) => {
     }
   
     try {
-      const response = await axios.post('http://192.168.137.1:7071/auth/signing', {
+      const response = await axios.post('http://192.168.0.239:7071/auth/signing', {
         email: email,
         password: password,
       });

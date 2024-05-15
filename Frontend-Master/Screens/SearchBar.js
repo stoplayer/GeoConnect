@@ -60,7 +60,7 @@ export default function App() {
 
   const saveContactsToBackend = async (contacts) => {
     try {
-      const backendUrl = 'http://192.168.137.1:7071/public/addcontact';
+      const backendUrl = 'http://192.168.0.239:7071/public/addcontact';
       
       // Iterate over each contact and make a POST request to the API
       contacts.forEach(async (contact) => {

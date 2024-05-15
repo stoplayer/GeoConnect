@@ -29,7 +29,7 @@ export default function SignUp() {
         phonenumber: countryCode + phoneNumber,
       };
   
-      const response = await axios.post('http://192.168.137.1:7071/auth/signup', requestData, {
+      const response = await axios.post('http://192.168.0.239:7071/auth/signup', requestData, {
         headers: {
           'Content-Type': 'application/json',
         },
