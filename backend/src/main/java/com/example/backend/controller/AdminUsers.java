@@ -1,4 +1,6 @@
 package com.example.backend.controller;
+import com.example.backend.entity.OurUsers;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
 import com.example.backend.dto.ReqRes;
 import com.example.backend.entity.Product;
@@ -6,11 +8,14 @@ import com.example.backend.entity.Pays;
 import com.example.backend.service.PaysService;
 import com.example.backend.entity.Contact;
 import com.example.backend.service.ContactService;
+import com.example.backend.service.OurUserDetailsService;
 import com.example.backend.repository.ProductRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,25 +28,48 @@ public class AdminUsers {
     private ProductRepo productRepo;
     private final PaysService paysService;
     private final ContactService contactService;
-
+    private final OurUserDetailsService ourUsersService;
     @Autowired
-    public AdminUsers(PaysService paysService, ContactService contactService) {
+    public AdminUsers(PaysService paysService, ContactService contactService,OurUserDetailsService ourUsersService) {
         this.paysService = paysService;
-        this.contactService = contactService;
-    }
-    @GetMapping("/public/product")
-    public ResponseEntity<Object> getAllProducts(){
-        return ResponseEntity.ok(productRepo.findAll());
-    }
+        this.contactService = contactService;this.ourUsersService = ourUsersService;
 
-    @PostMapping("/admin/saveproduct")
-    public ResponseEntity<Object> signUp(@RequestBody ReqRes productRequest){
-        Product productToSave = new Product();
-        productToSave.setName(productRequest.getName());
-        return ResponseEntity.ok(productRepo.save(productToSave));
     }
 
 
+    @GetMapping("/public/searchemail/{email}")
+    public ResponseEntity<UserDetails> getUserByEmail(@PathVariable String email) {
+        try {
+            UserDetails userDetails = ourUserDetailsService.loadUserByUsername(email);
+            return ResponseEntity.ok(userDetails);
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/public/addfriend/{userId}/{friendId}")
+    public ResponseEntity<OurUsers> addFriend(@PathVariable int userId, @PathVariable int friendId) {
+        OurUsers user = ourUsersService.getUserById(userId);
+
+        ourUsersService.addFriend(userId, friendId);
+        return ResponseEntity.ok(user);
+    }
+    /*
+
+    @PostMapping("/public/friends")
+    public ResponseEntity<OurUsers> addFriend(@RequestParam int userId, @RequestParam int friendId) {
+        OurUsers user = ourUsersService.getUserById(userId);
+        OurUsers friend = ourUsersService.getUserById(friendId);
+        ourUsersService.addFriend(user, friend);
+        return ResponseEntity.ok(user);
+    }*/
+    //Pays section
+    @PostMapping("/admin/addpays")
+
+    public ResponseEntity<Pays> addPays(@RequestBody Pays pays) {
+        Pays newPays = paysService.addPays(pays);
+        return ResponseEntity.ok(newPays);
+    }
     @GetMapping("/user/alone")
     public ResponseEntity<Object> userAlone(){
         return ResponseEntity.ok("USers alone can access this ApI only");
@@ -50,6 +78,18 @@ public class AdminUsers {
     @GetMapping("/adminuser/both")
     public ResponseEntity<Object> bothAdminaAndUsersApi(){
         return ResponseEntity.ok("Both Admin and Users Can  access the api");
+    }
+
+    @Autowired
+    private OurUserDetailsService ourUserDetailsService;
+    @GetMapping("/public/search-by-phone/{phoneNumber}")
+    public ResponseEntity<OurUsers> getUserByPhoneNumber(@PathVariable String phoneNumber) {
+        Optional<OurUsers> user = ourUserDetailsService.findByPhoneNumber(phoneNumber);
+        if (user.isPresent()) {
+            return ResponseEntity.ok(user.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     /** You can use this to get the details(name,email,role,ip, e.t.c) of user accessing the service*/
@@ -62,13 +102,7 @@ public class AdminUsers {
         return authentication.getName(); // returns the email
     }
 
-    //Pays section
-    @PostMapping("/admin/addpays")
 
-    public ResponseEntity<Pays> addPays(@RequestBody Pays pays) {
-        Pays newPays = paysService.addPays(pays);
-        return ResponseEntity.ok(newPays);
-    }
 
     /*@PutMapping("/public/{id}")
     public ResponseEntity<Pays> updatePays(@PathVariable("id") Long id, @RequestBody Pays pays) {

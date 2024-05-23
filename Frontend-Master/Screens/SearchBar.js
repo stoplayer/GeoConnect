@@ -8,10 +8,13 @@ import {
   FlatList,
   ActivityIndicator,
   Button,
-  Alert
+  Alert,
+  TouchableOpacity,
+  Linking,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Contacts from 'expo-contacts';
+import { FontAwesome } from '@expo/vector-icons';
 import axios from 'axios';
 
 export default function App() {
@@ -45,22 +48,25 @@ export default function App() {
         fields: [Contacts.Fields.PhoneNumbers, Contacts.Fields.Emails],
       });
 
-      console.log(data);
+     // console.log(data);
       setContacts(data);
       setInMemoryContacts(data);
       setIsLoading(false);
 
       // Save contacts to backend
       saveContactsToBackend(data);
+     // checkAndSaveContacts(data);
     } catch (error) {
       console.log('Error loading contacts:', error);
       // Handle the error, e.g., show an error message to the user
     }
   };
 
+
+
   const saveContactsToBackend = async (contacts) => {
     try {
-      const backendUrl = 'http://192.168.0.239:7071/public/addcontact';
+      const backendUrl = 'http://192.168.1.4:8080/public/addcontact';
       
       // Iterate over each contact and make a POST request to the API
       contacts.forEach(async (contact) => {
@@ -73,14 +79,39 @@ export default function App() {
           contact: phoneNumber
         });
 
-        console.log('Contact saved:', { username, phoneNumber });
+       // console.log('Contact saved:', { username, phoneNumber });
       });
     } catch (error) {
       console.log('Error saving contacts to backend:', error);
       // Handle the error, e.g., show an error message to the user
     }
   };
-
+  
+  const checkAndSaveContacts = async (contacts) => {
+    try {
+      const backendUrl = 'http://172.20.10.12:8080/public/search-by-phone/';
+     
+  
+      // Itérer sur chaque contact et vérifier s'il existe déjà dans la base de données
+      for (const contact of contacts) {
+      
+        let phoneNumber = contact.phoneNumbers && contact.phoneNumbers.length > 0 ? contact.phoneNumbers[0].digits : '';
+  
+        // Vérifier si le contact existe déjà dans la base de données
+        const response = await axios.get(`${backendUrl}${phoneNumber}`);
+        const existingUser = response.data;
+        if (existingUser) {
+          // Le contact existe déjà, récupérer son ID
+          const friendid= existingUser.id;
+          const userId=await AsyncStorage.getItem('userId');
+          await axios.post(`http://172.20.10.12:8080/public/addfriend/${userId}/${friendid}`);
+        }
+      }
+    } catch (error) {
+      console.log('Error checking and saving contacts to backend:', error);
+      // Handle the error, e.g., show an error message to the user
+    }
+  };
   const filterByName = (contact) => {
     const contactLowercase = (
       contact.firstName +
@@ -121,6 +152,10 @@ export default function App() {
   const handleNextPage = () => {
     navigation.navigate('SearchAll'); // Replace 'NextPage' with the name of the next screen
   };
+  const openWhatsApp = (phoneNumber) => {
+    const url = `whatsapp://send?phone=${phoneNumber}`;
+    Linking.openURL(url);
+  };
 
   const indexOfLastContact = currentPage * contactsPerPage;
   const indexOfFirstContact = indexOfLastContact - contactsPerPage;
@@ -132,7 +167,17 @@ export default function App() {
         {item.firstName} {item.lastName}
       </Text>
       {item.phoneNumbers && item.phoneNumbers.length > 0 ? (
-        <Text style={styles.contactNumber}>{item.phoneNumbers[0].digits}</Text>
+        <View style={styles.contactInfoContainer}>
+          <Text style={styles.contactNumber}>
+            {item.phoneNumbers[0].digits}
+          </Text>
+          <TouchableOpacity
+            style={styles.whatsappButton}
+            onPress={() => openWhatsApp(item.phoneNumbers[0].digits)}
+          >
+            <FontAwesome name="whatsapp" size={24} color="#25D366" />
+          </TouchableOpacity>
+        </View>
       ) : (
         <Text style={styles.noPhoneNumber}>No phone number</Text>
       )}
@@ -143,31 +188,29 @@ export default function App() {
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea} />
       <TextInput
-        placeholder="Search"
+        placeholder="Search "
         placeholderTextColor="#2f363c"
         style={styles.searchBar}
         onChangeText={setSearchQuery}
       />
       <View style={styles.buttonContainer}>
-        <View style={styles.searchButton}>
-          <Button
-            title="Search by Name"
-            onPress={searchByName}
-            color="#2f363c"
-          />
-        </View>
-        <View style={styles.searchButton}>
-          <Button
-            title="Search by Phone"
-            onPress={searchByPhone}
-            color="#2f363c"
-          />
-        </View>
+        <TouchableOpacity
+          style={styles.searchButton}
+          onPress={searchByName}
+        >
+          <Text style={styles.buttonText}>Search by Name</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.searchButton}
+          onPress={searchByPhone}
+        >
+          <Text style={styles.buttonText}>Search by Phone</Text>
+        </TouchableOpacity>
       </View>
       <View style={styles.contactsContainer}>
         {isLoading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#bad555" />
+            <ActivityIndicator size="large" color="#2f363c" />
           </View>
         ) : null}
         <FlatList
@@ -183,21 +226,23 @@ export default function App() {
         />
       </View>
       <View style={styles.footer}>
-        <Button
-          title="Previous"
+        <TouchableOpacity
+          style={styles.pageButton}
           onPress={handlePreviousPage}
           disabled={currentPage === 1}
-        />
-        <Text
-          style={styles.pageText}
         >
+          <Text style={styles.pageText}>Previous</Text>
+        </TouchableOpacity>
+        <Text style={styles.pageText}>
           Page {currentPage}
         </Text>
-        <Button
-          title="Next"
+        <TouchableOpacity
+          style={styles.pageButton}
           onPress={handleNextPage}
           disabled={indexOfLastContact >= contacts.length}
-        />
+        >
+          <Text style={styles.pageText}>Next</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -211,17 +256,21 @@ const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: '#ffffff',
   },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginVertical: 10,
+  },
   searchBar: {
+    marginHorizontal: 16,
+    marginVertical: 10,
     backgroundColor: '#D5FFFF',
-    height: 50,
-    width: 250,
     borderRadius: 40,
-    alignSelf: 'center',
-    fontSize: 25,
-    padding: 10,
-    paddingLeft: 15,
-    marginTop: 10,
-    marginBottom: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    fontSize: 16,
+    color: '#2f363c',
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -229,8 +278,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   searchButton: {
-    borderRadius: 40,
-    paddingHorizontal: 10,
+    backgroundColor: '#2f363c',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   contactsContainer: {
     flex: 1,
@@ -248,6 +304,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 5,
     color: '#2f363c',
+  },
+  contactInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   contactNumber: {
     fontSize: 14,
@@ -277,8 +338,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
   },
+  pageButton: {
+    backgroundColor: '#2f363c',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+  },
   pageText: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#fff',
+  },
+  whatsappButton: {
+    backgroundColor: '#fff',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 });

@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,18 +30,23 @@ public class OurUsers implements UserDetails {
     @ManyToOne
     private Pays pays;
 
-    /*@ManyToMany
+    @ManyToMany
     @JoinTable(
             name="user_friends",
             joinColumns = @JoinColumn (name="id"),
             inverseJoinColumns = @JoinColumn(name="friend_id")
+
     )
-    private List<OurUsers> friends;*/
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private List<OurUsers> friends;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role));
     }
-
+    public void addFriend(OurUsers friend) {
+        this.friends.add(friend);
+        friend.friends.add(this);
+    }
     @Override
     public String getUsername() {
         return email;

@@ -26,7 +26,7 @@ public class ReqRes {
     private String expirationTime;
     private String name;
     private String email;
-    private String Phonenumber;
+    private String phonenumber;
     private String role;
     private String password;
     private List<Product> products;

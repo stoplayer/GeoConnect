@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, Image, TextInput, TouchableOpacity, ScrollView,
 import { useNavigation } from '@react-navigation/native';
 import ButtonSI from '../ButtonSI';
 import 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
 const SignIn = ({ navigation }) => {
@@ -19,18 +20,35 @@ const SignIn = ({ navigation }) => {
     }
   
     try {
-      const response = await axios.post('http://192.168.0.239:7071/auth/signing', {
+      const response = await axios.post('http://192.168.1.4:8080/auth/signing', {
         email: email,
         password: password,
       });
-  
       console.log("Response received:", response);
+
   
       if (response.status === 200 && response.data.statusCode === 200) {
         // Connexion réussie
         console.log("Sign in successful:", response.data);
         Alert.alert('Success', 'Signed in successfully');
         navigation.navigate('SearchBar');
+        const userResponse = await axios.get(`http://192.168.1.4:8080/public/searchemail/${email}`);
+        if (userResponse.status === 200) {
+          // Stocker l'ID de l'utilisateur dans une variable
+          const userId = userResponse.data.id;
+          await AsyncStorage.setItem('userId', userId.toString());
+          const usr = await AsyncStorage.getItem('userId');
+          console.log("User ID:", usr);
+          // Vous pouvez maintenant utiliser cette variable userId dans votre application
+        } else {
+          console.error("Error fetching user data:", userResponse.data);
+        }
+
+
+
+     
+
+        
       } else if (response.status === 200 && response.data.statusCode === 500 && response.data.error === "Bad credentials") {
         // Erreur d'authentification
         console.error("Sign in error:", response.data);

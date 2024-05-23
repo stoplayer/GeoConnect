@@ -1,3 +1,4 @@
+// SearcheAll.js
 import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
@@ -8,16 +9,12 @@ import {
   FlatList,
   ActivityIndicator,
   Button,
-  Alert,
   TouchableOpacity,
-  Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import * as Location from 'expo-location';
-import MapView, { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
-import geolib from 'geolib';
 import axios from 'axios';
+import LocationScreen from './Location';
 
 export default function SearcheAll() {
   const navigation = useNavigation();
@@ -27,21 +24,14 @@ export default function SearcheAll() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [contactsPerPage] = useState(10);
-  const [userLocation, setUserLocation] = useState(null);
-  const [nearestPhoneNumber, setNearestPhoneNumber] = useState(null);
-  const [mapRegion, setMapRegion] = useState({
-    latitude: 37.78825,
-    longitude: -122.4324,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  });
 
   const searchByName = async () => {
     try {
-      const response = await axios.get(`http://192.168.0.239:7071/public/contact/username/${searchQuery}`);
+      const response = await axios.get(`http://192.168.1.4:8080/public/contact/username/${searchQuery}`);
       const data = response.data;
       setContacts(data);
       setInMemoryContacts(data);
+      console.log(response.data);
     } catch (error) {
       console.log('Error searching contacts by name:', error);
     }
@@ -49,7 +39,7 @@ export default function SearcheAll() {
 
   const searchByPhone = async () => {
     try {
-      const response = await axios.get(`http://192.168.0.239:7071/public/contact/contact/${searchQuery}`);
+      const response = await axios.get(`http://192.168.1.4:8080/public/contact/contact/${searchQuery}`);
       const data = response.data;
       setContacts(data);
       setInMemoryContacts(data);
@@ -66,72 +56,37 @@ export default function SearcheAll() {
     navigation.navigate('');
   };
 
+  const handleNavigateToMap = () => {
+  navigation.navigate('LocationScreen');
+};
+
   const indexOfLastContact = currentPage * contactsPerPage;
   const indexOfFirstContact = indexOfLastContact - contactsPerPage;
   const currentContacts = contacts.slice(indexOfFirstContact, indexOfLastContact);
 
   const renderItem = ({ item }) => (
     <View style={styles.contactContainer}>
-      <Text style={styles.contactName}>
-        {item.firstName} {item.lastName}
-      </Text>
-      {item.phoneNumbers && item.phoneNumbers.length > 0 ? (
-        <Text style={styles.contactNumber}>{item.phoneNumbers[0].digits}</Text>
-      ) : (
-        <Text style={styles.noPhoneNumber}>No phone number</Text>
-      )}
+      <View style={styles.contactInfoContainer}>
+        <Text style={styles.contactName}>
+          {item.username}
+        </Text>
+        {item.contact ? (
+          <View style={styles.contactNumberContainer}>
+            <Ionicons name="call" size={18} color="#2f363c" />
+            <Text style={styles.contactNumber}>{item.contact}</Text>
+            <TouchableOpacity
+              style={styles.whatsappButton}
+              onPress={() => openWhatsApp(item.contact)}
+            >
+              <Ionicons name="logo-whatsapp" size={24} color="#25D366" />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <Text style={styles.noPhoneNumber}>No phone number</Text>
+        )}
+      </View>
     </View>
   );
-
-  const handleGetLocation = async () => {
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Permission to access location was denied');
-        return;
-      }
-
-      const location = await Location.getCurrentPositionAsync({});
-      setUserLocation(location.coords);
-      setMapRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      });
-
-      // Find the nearest phone number within 100 square meters
-      const nearestNumber = contacts.reduce((prev, curr) => {
-        if (!curr.phoneNumbers || curr.phoneNumbers.length === 0 || !curr.latitude || !curr.longitude) {
-          return prev;
-        }
-
-        const distance = geolib.getDistance(
-          { latitude: location.coords.latitude, longitude: location.coords.longitude },
-          { latitude: curr.latitude, longitude: curr.longitude }
-        );
-
-        if (distance <= 100 && (!prev.distance || distance < prev.distance)) {
-          return { number: curr.phoneNumbers[0].digits, latitude: curr.latitude, longitude: curr.longitude, distance };
-        }
-
-        return prev;
-      }, null);
-
-      setNearestPhoneNumber(nearestNumber);
-
-      if (nearestNumber) {
-        Alert.alert(
-          'Nearest Phone Number',
-          `The nearest phone number within 100m is: ${nearestNumber.number}`
-        );
-      } else {
-        Alert.alert('No Phone Number Found', 'There are no phone numbers within 100m');
-      }
-    } catch (error) {
-      console.log('Error getting location:', error);
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -143,25 +98,23 @@ export default function SearcheAll() {
           style={styles.searchBar}
           onChangeText={setSearchQuery}
         />
-        <TouchableOpacity style={styles.locationButton} onPress={handleGetLocation}>
+        <TouchableOpacity style={styles.locationButton} onPress={handleNavigateToMap}>
           <Ionicons name="map" size={24} color="#2f363c" />
         </TouchableOpacity>
       </View>
       <View style={styles.buttonContainer}>
-        <View style={styles.searchButton}>
-          <Button
-            title="Search by Name"
-            onPress={searchByName}
-            color="#2f363c"
-          />
-        </View>
-        <View style={styles.searchButton}>
-          <Button
-            title="Search by Phone"
-            onPress={searchByPhone}
-            color="#2f363c"
-          />
-        </View>
+        <TouchableOpacity
+          style={styles.searchButton}
+          onPress={searchByName}
+        >
+          <Text style={styles.buttonText}>Search by Name</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.searchButton}
+          onPress={searchByPhone}
+        >
+          <Text style={styles.buttonText}>Search by Phone</Text>
+        </TouchableOpacity>
       </View>
       <View style={styles.contactsContainer}>
         {isLoading ? (
@@ -169,25 +122,6 @@ export default function SearcheAll() {
             <ActivityIndicator size="large" color="#2f363c" />
           </View>
         ) : null}
-        {userLocation && (
-          <MapView
-            style={styles.map}
-            region={mapRegion}
-            showsUserLocation={true}
-          >
-            <Marker coordinate={userLocation} />
-            {nearestPhoneNumber && (
-              <Marker
-                coordinate={{
-                  latitude: nearestPhoneNumber.latitude,
-                  longitude: nearestPhoneNumber.longitude,
-                }}
-                title="Nearest Phone Number"
-                description={`Number: ${nearestPhoneNumber.number}`}
-              />
-            )}
-          </MapView>
-        )}
         <FlatList
           data={currentContacts}
           renderItem={renderItem}
@@ -206,11 +140,7 @@ export default function SearcheAll() {
           onPress={handlePreviousPage}
           disabled={currentPage === 1}
         />
-        <Text
-          style={styles.pageText}
-        >
-          Page {currentPage}
-        </Text>
+        <Text style={styles.pageText}>Page {currentPage}</Text>
         <Button
           title="Next"
           onPress={handleNextPage}
@@ -252,13 +182,19 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginHorizontal: 16,
-    marginVertical: 10,
+    justifyContent: 'space-evenly',
+    marginBottom: 10,
   },
   searchButton: {
-    flex: 1,
-    marginHorizontal: 4,
+    backgroundColor: '#2f363c',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   contactsContainer: {
     flex: 1,
