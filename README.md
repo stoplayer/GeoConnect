@@ -10,7 +10,7 @@
 7. Usage
 8. Folder Structure
 9. Dependencies
-10. Contributing
+10. Contribution
 
 ## Overview
 GeoConnect est une application mobile innovante qui représente une avancée majeure dans le domaine des communications numériques. Elle allie des fonctionnalités de recherche avancée des identités liées aux numéros de téléphone à des capacités de localisation précise. Cette combinaison unique permet aux utilisateurs de vérifier l'identité des appelants, de gérer les appels indésirables, et de localiser des contacts à proximité, facilitant ainsi les interactions sociales et professionnelles.
@@ -39,6 +39,7 @@ Le front-end de GeoConnect a été développé avec React Native, offrant une ex
 
 ## Backend
 Le back-end de GeoConnect a été développé avec Spring Boot, assurant des performances élevées et une gestion efficace des données. Il intègre également des mesures de sécurité robustes pour garantir la confidentialité des données et la protection contre les accès non autorisés.
+
 
 ## Prérequis
 
@@ -144,7 +145,7 @@ Les principales dépendances du projet GeoConnect sont :
 - React Native
 Le front-end de GeoConnect a été développé avec React Native, offrant une expérience utilisateur intuitive et réactive sur divers appareils mobiles. L'interface utilisateur a été conçue pour être simple et agréable à utiliser.
 
-### Main Dependencies
+### Main Dependencies Frontend
 
 Le frontend de GeoConnect est construit avec plusieurs dépendances clés qui assurent une application robuste et efficace. Voici les principales dépendances utilisées dans ce projet :
 
@@ -162,13 +163,36 @@ Le frontend de GeoConnect est construit avec plusieurs dépendances clés qui as
 - **Geolib**: `geolib@^3.3.4` - Une bibliothèque pour les calculs de géolocalisation.
 
 
-- Spring Boot
+- Spring Boot : 
+Le back-end de GeoConnect a été développé avec Spring Boot, assurant des performances élevées et une gestion efficace des données. Il intègre également des mesures de sécurité robustes pour garantir la confidentialité des données et la protection contre les accès non autorisés.
+
+### Main Dependencies for backend
+
+Le backend de GeoConnect est construit avec plusieurs dépendances clés qui assurent une application robuste et efficace. Voici les principales dépendances utilisées dans ce projet :
+
+- **Spring Boot Starter Data JPA**: `org.springframework.boot:spring-boot-starter-data-jpa`
+- **Spring Boot Starter Security**: `org.springframework.boot:spring-boot-starter-security`
+- **Spring Boot Starter Web**: `org.springframework.boot:spring-boot-starter-web`
+- **MySQL Connector**: `com.mysql:mysql-connector-j`
+- **PostgreSQL**: `org.postgresql:postgresql`
+- **Lombok**: `org.projectlombok:lombok`
+- **JWT (JSON Web Token)**:
+  - `io.jsonwebtoken:jjwt-impl`
+  - `io.jsonwebtoken:jjwt-api`
+  - `io.jsonwebtoken:jjwt-jackson`
+- **Spring Boot Starter Test**: `org.springframework.boot:spring-boot-starter-test`
+- **Spring Security Test**: `org.springframework.security:spring-security-test`
+- **Spring Boot Starter Mail**: `org.springframework.boot:spring-boot-starter-mail`
 
 
 Consultez les fichiers `package.json` et `pom.xml` pour la liste complète des dépendances.
 
-## Video Demonstration
-Une vidéo de démonstration de l'application GeoConnect est disponible sur [lien vers la vidéo].
+## Contributeurs :
+- ELABOUDI Wail
+- GHOULAM Nouhaila
+- AMAL Yassine
+- LABRACH Youssef
+- ROUKNY Anas
 
 ## Contributing
 Les contributions sont les bienvenues ! Si vous souhaitez contribuer au projet GeoConnect, veuillez suivre les étapes suivantes :
