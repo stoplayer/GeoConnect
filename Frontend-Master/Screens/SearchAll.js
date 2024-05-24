@@ -27,7 +27,7 @@ export default function SearcheAll() {
 
   const searchByName = async () => {
     try {
-      const response = await axios.get(`http://192.168.1.4:8080/public/contact/username/${searchQuery}`);
+      const response = await axios.get(`http://192.168.1.35:8080/public/contact/username/${searchQuery}`);
       const data = response.data;
       setContacts(data);
       setInMemoryContacts(data);
@@ -39,7 +39,7 @@ export default function SearcheAll() {
 
   const searchByPhone = async () => {
     try {
-      const response = await axios.get(`http://192.168.1.4:8080/public/contact/contact/${searchQuery}`);
+      const response = await axios.get(`http://192.168.1.35:8080/public/contact/contact/${searchQuery}`);
       const data = response.data;
       setContacts(data);
       setInMemoryContacts(data);
@@ -249,4 +249,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#2f363c',
   },
+  whatsappButton: {
+    backgroundColor: '#fff',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  
 });

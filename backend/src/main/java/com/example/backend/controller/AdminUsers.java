@@ -47,13 +47,7 @@ public class AdminUsers {
         }
     }
 
-    @PostMapping("/public/addfriend/{userId}/{friendId}")
-    public ResponseEntity<OurUsers> addFriend(@PathVariable int userId, @PathVariable int friendId) {
-        OurUsers user = ourUsersService.getUserById(userId);
 
-        ourUsersService.addFriend(userId, friendId);
-        return ResponseEntity.ok(user);
-    }
     /*
 
     @PostMapping("/public/friends")

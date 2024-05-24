@@ -20,11 +20,11 @@ const SignIn = ({ navigation }) => {
     }
   
     try {
-      const response = await axios.post('http://192.168.1.4:8080/auth/signing', {
+      const response = await axios.post('http://192.168.1.35:8080/auth/signing', {
         email: email,
         password: password,
       });
-      console.log("Response received:", response);
+      
 
   
       if (response.status === 200 && response.data.statusCode === 200) {
@@ -32,7 +32,7 @@ const SignIn = ({ navigation }) => {
         console.log("Sign in successful:", response.data);
         Alert.alert('Success', 'Signed in successfully');
         navigation.navigate('SearchBar');
-        const userResponse = await axios.get(`http://192.168.1.4:8080/public/searchemail/${email}`);
+        const userResponse = await axios.get(`http://192.168.1.35:8080/public/searchemail/${email}`);
         if (userResponse.status === 200) {
           // Stocker l'ID de l'utilisateur dans une variable
           const userId = userResponse.data.id;

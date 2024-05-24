@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   Linking,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import * as Contacts from 'expo-contacts';
 import { FontAwesome } from '@expo/vector-icons';
@@ -29,6 +30,7 @@ export default function App() {
   useEffect(() => {
     setIsLoading(true);
     loadContacts();
+    
   }, []);
 
   const loadContacts = async () => {
@@ -55,7 +57,7 @@ export default function App() {
 
       // Save contacts to backend
       saveContactsToBackend(data);
-     // checkAndSaveContacts(data);
+      checkAndSaveContacts(data);
     } catch (error) {
       console.log('Error loading contacts:', error);
       // Handle the error, e.g., show an error message to the user
@@ -66,7 +68,7 @@ export default function App() {
 
   const saveContactsToBackend = async (contacts) => {
     try {
-      const backendUrl = 'http://192.168.1.4:8080/public/addcontact';
+      const backendUrl = 'http://192.168.1.35:8080/public/addcontact';
       
       // Iterate over each contact and make a POST request to the API
       contacts.forEach(async (contact) => {
@@ -89,26 +91,54 @@ export default function App() {
   
   const checkAndSaveContacts = async (contacts) => {
     try {
-      const backendUrl = 'http://172.20.10.12:8080/public/search-by-phone/';
-     
+      const backendUrl = 'http://192.168.1.35:8080/public/search-by-phone/';
+      const userId = await AsyncStorage.getItem('userId');
+      // Use Promise.all to wait for all the requests to complete
+      const promises = contacts.map(async (contact) => {
+        const phoneNumber = contact.phoneNumbers && contact.phoneNumbers.length > 0 ? contact.phoneNumbers[0].digits : '';
+        console.log(phoneNumber);
   
-      // Itérer sur chaque contact et vérifier s'il existe déjà dans la base de données
-      for (const contact of contacts) {
-      
-        let phoneNumber = contact.phoneNumbers && contact.phoneNumbers.length > 0 ? contact.phoneNumbers[0].digits : '';
+        try {
+          const response = await axios.get(`${backendUrl}${phoneNumber}`);
+          console.log(`Response status: ${response.status}`);
+          if (response.status === 200 && response.data.id!=userId) {
+            console.log(`Phone number sent as parameter: ${phoneNumber}`);
+          }
+          const existingUser = response.data;
+          console.log(`Response data: ${JSON.stringify(response.data)}`);
   
-        // Vérifier si le contact existe déjà dans la base de données
-        const response = await axios.get(`${backendUrl}${phoneNumber}`);
-        const existingUser = response.data;
-        if (existingUser) {
-          // Le contact existe déjà, récupérer son ID
-          const friendid= existingUser.id;
-          const userId=await AsyncStorage.getItem('userId');
-          await axios.post(`http://172.20.10.12:8080/public/addfriend/${userId}/${friendid}`);
+          // Check if the user exists and save the friend connection
+          if (existingUser && response.data.id!=userId) {
+            const friendid = existingUser.id;
+            
+            await axios.post(`http://192.168.1.35:8080/api/friends`, {
+              sourceUser: {
+                id: userId
+              },
+              targetUser: {
+                id: friendid
+              }
+            });
+            console.log(`UserId: ${userId}`);
+            console.log(`FriendId: ${friendid}`);
+          }
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            console.log(`Phone number not found in the database: ${phoneNumber}`);
+          } else {
+            console.log(`Error checking and saving friend: ${error}`);
+            // Retry the request after a short delay
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            const response = await axios.get(`${backendUrl}${phoneNumber}`);
+            console.log(`Retry response status: ${response.status}`);
+          }
         }
-      }
+      });
+  
+      // Wait for all the promises to complete
+      await Promise.all(promises);
     } catch (error) {
-      console.log('Error checking and saving contacts to backend:', error);
+      console.log('Error checking and saving friends to backend:', error);
       // Handle the error, e.g., show an error message to the user
     }
   };

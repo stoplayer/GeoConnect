@@ -6,6 +6,8 @@ import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -30,6 +32,10 @@ public class OurUsers implements UserDetails {
     @ManyToOne
     private Pays pays;
 
+    @OneToMany(mappedBy = "sourceUser")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private List<Friend> friendslist = new ArrayList<>();
+/*
     @ManyToMany
     @JoinTable(
             name="user_friends",
@@ -38,15 +44,15 @@ public class OurUsers implements UserDetails {
 
     )
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private List<OurUsers> friends;
+    private List<OurUsers> friends;*/
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role));
     }
-    public void addFriend(OurUsers friend) {
-        this.friends.add(friend);
-        friend.friends.add(this);
-    }
+//    public void addFriend(OurUsers friend) {
+//        this.friends.add(friend);
+//        friend.friends.add(this);
+//    }
     @Override
     public String getUsername() {
         return email;

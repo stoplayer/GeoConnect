@@ -23,21 +23,7 @@ public class OurUserDetailsService implements UserDetailsService {
     public Optional<OurUsers> findByPhoneNumber(String phoneNumber) {
         return ourUserRepo.findByPhonenumber(phoneNumber);
     }
-    public void addFriend(int userId, int friendId) {
-        OurUsers user = getUserById(userId);
-        OurUsers friend = getUserById(friendId);
 
-        // Vérifier si l'amitié existe déjà
-        if (user.getFriends().contains(friend)) {
-            return; // L'amitié existe déjà, on ne fait rien
-        }
-
-        // Ajouter l'amitié
-        user.addFriend(friend);
-        friend.addFriend(user);
-        ourUserRepo.save(user);
-        ourUserRepo.save(friend);
-    }
     public OurUsers getUserById(int id) {
         return ourUserRepo.findById(id).orElseThrow();
     }
