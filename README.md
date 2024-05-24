@@ -124,7 +124,7 @@ Une fois l'application lancée, les utilisateurs peuvent :
 - Rechercher des identités liées à des numéros de téléphone
 - Localiser des contacts dans un rayon spécifique
 - Recevoir des alertes personnalisées sur la présence de contacts importants à proximité
-- Personnaliser les paramètres de notification selon leurs préférences
+- Démarrer une conversation avec l'un de nos contacts ou ami(Utilisateur GeoConnet) avec une redirection vers l'application "Whatsapp"
 
 ## Structure du projet
 Le projet GeoConnect est organisé de la manière suivante :
