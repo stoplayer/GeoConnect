@@ -20,7 +20,7 @@ L'application GeoConnect a été développée en utilisant les technologies suiv
 
 - Front-end : React Native
 - Back-end : Spring Boot
-![Spring mvc](Images\spring-mvc.png)
+![Spring mvc](https://postimg.cc/YjX9nqTK)
 
 Base de données : MySQL est utilisé pour stocker toutes les données de l'application.
 Spring Boot : Fournit le cadre pour le back-end, gère les requêtes HTTP, et intègre les composants.
