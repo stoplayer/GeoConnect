@@ -22,7 +22,13 @@ L'application GeoConnect a été développée en utilisant les technologies suiv
 
 - Front-end : React Native
 - Back-end : Spring Boot
-![Spring mvc](https://postimg.cc/YjX9nqTK)
+
+
+
+  
+<a href="https://imgbb.com/"><img src="https://i.ibb.co/QrN2WN9/spring-mvc.png" alt="spring-mvc" border="0"></a>
+
+
 
 Base de données : MySQL est utilisé pour stocker toutes les données de l'application.
 Spring Boot : Fournit le cadre pour le back-end, gère les requêtes HTTP, et intègre les composants.
@@ -178,7 +184,6 @@ Le backend de GeoConnect est construit avec plusieurs dépendances clés qui ass
 - **Spring Boot Starter Security**: `org.springframework.boot:spring-boot-starter-security`
 - **Spring Boot Starter Web**: `org.springframework.boot:spring-boot-starter-web`
 - **MySQL Connector**: `com.mysql:mysql-connector-j`
-- **PostgreSQL**: `org.postgresql:postgresql`
 - **Lombok**: `org.projectlombok:lombok`
 - **JWT (JSON Web Token)**:
   - `io.jsonwebtoken:jjwt-impl`
