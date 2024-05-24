@@ -1,6 +1,6 @@
 # GeoConnect
 
-Ce projet est une application mobile pour la gestion et géolocalisation de contacts, développée avec React-native e pour la partie Frontend, et Spring Boot avec Maven pour la partie Backend. L'application permet de naviguer dans nos propres contacts,rechercher des personnes hors de nos contacts en se basant sur le nom ou bien le numéro de téléphone et géolocalisation des contacts utilisateurs de l'application dans une rayon de 100 m².
+Ce projet est une application mobile pour la gestion et géolocalisation de contacts, développée avec React-native  pour la partie Frontend, et Spring Boot avec Maven pour la partie Backend. L'application permet de naviguer dans nos propres contacts,rechercher des personnes hors de nos contacts en se basant sur le nom ou bien le numéro de téléphone et géolocalisation des contacts utilisateurs de l'application dans une rayon de 100 m².
 
 ## Table des Matières
 1. Apérçu
