@@ -1,5 +1,7 @@
 # GeoConnect
 
+Ce projet est une application mobile pour la gestion et géolocalisation de contacts, développée avec React-native e pour la partie Frontend, et Spring Boot avec Maven pour la partie Backend. L'application permet de naviguer dans nos propres contacts,rechercher des personnes hors de nos contacts en se basant sur le nom ou bien le numéro de téléphone et géolocalisation des contacts utilisateurs de l'application dans une rayon de 100 m².
+
 ## Table des Matières
 1. Apérçu
 2. Architecture Logiciel
@@ -8,14 +10,14 @@
 5. Prérequis
 6. Installation et execution 
 7. Usage
-8. Folder Structure
+8. Structure du projet
 9. Dependencies
 10. Contribution
 
-## Overview
+## Apérçu
 GeoConnect est une application mobile innovante qui représente une avancée majeure dans le domaine des communications numériques. Elle allie des fonctionnalités de recherche avancée des identités liées aux numéros de téléphone à des capacités de localisation précise. Cette combinaison unique permet aux utilisateurs de vérifier l'identité des appelants, de gérer les appels indésirables, et de localiser des contacts à proximité, facilitant ainsi les interactions sociales et professionnelles.
 
-## Software Architecture
+## Architecture Logiciel
 L'application GeoConnect a été développée en utilisant les technologies suivantes :
 
 - Front-end : React Native
@@ -124,7 +126,7 @@ Une fois l'application lancée, les utilisateurs peuvent :
 - Recevoir des alertes personnalisées sur la présence de contacts importants à proximité
 - Personnaliser les paramètres de notification selon leurs préférences
 
-## Folder Structure
+## Structure du projet
 Le projet GeoConnect est organisé de la manière suivante :
 GeoConnect/
 ```
@@ -201,3 +203,11 @@ Les contributions sont les bienvenues ! Si vous souhaitez contribuer au projet G
 2. Créez une nouvelle branche pour vos modifications
 3. Effectuez vos changements et testez-les
 4. Soumettez une pull request avec une description détaillée de vos modifications
+
+## License
+
+Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+---
+
+&copy; 2024 Votre stoplayer. Tous droits réservés.
